@@ -79,10 +79,15 @@ function createWindow() {
   });
   win.once('ready-to-show', () => win.show());
   win.webContents.setWindowOpenHandler(({ url }) => { void openExternal(url); return { action: 'deny' }; });
-  win.webContents.on('will-navigate', (e, url) => { if (!url.startsWith('file:') && !url.startsWith('http://localhost:5173')) { e.preventDefault(); void openExternal(url); } });
   const dev = process.env.VITE_DEV_SERVER_URL;
-  if (dev) void win.loadURL(dev); else void win.loadFile(path.join(__dirname, '../../dist/index.html'));
-  if (process.env.STARBASE_SCREENSHOT) {
+  const indexPath = path.join(__dirname, '../../dist/index.html');
+  const allowedOrigin = dev ?? `file://${indexPath}`;
+  win.webContents.on('will-navigate', (e, url) => {
+    const isOwnEntry = url === allowedOrigin || (!dev && url.startsWith('file://') && url.includes('/dist/index.html'));
+    if (!isOwnEntry) { e.preventDefault(); void openExternal(url); }
+  });
+  if (dev) void win.loadURL(dev); else void win.loadFile(indexPath);
+  if (process.env.STARBASE_SCREENSHOT && !app.isPackaged) {
     win.webContents.once('did-finish-load', () => setTimeout(async () => {
       if (process.env.STARBASE_SCREENSHOT_JS) { await win.webContents.executeJavaScript(process.env.STARBASE_SCREENSHOT_JS); await new Promise((r) => setTimeout(r, 1500)); }
       const img = await win.webContents.capturePage();
@@ -91,13 +96,36 @@ function createWindow() {
   }
 }
 
-app.whenReady().then(() => {
-  ipcMain.handle('news:get', () => getNews());
-  ipcMain.handle('links:get', () => getLinks());
-  ipcMain.handle('links:save', (_e, v) => saveLinks(v));
-  ipcMain.handle('open:external', (_e, url) => openExternal(url));
-  ipcMain.handle('spotify:launch', () => launchSpotify());
-  createWindow();
-  app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
-});
-app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
+function validateSender(e: Electron.IpcMainInvokeEvent): boolean {
+  const win = BrowserWindow.fromWebContents(e.sender);
+  return win !== null && !e.sender.isDestroyed();
+}
+
+const gotLock = app.requestSingleInstanceLock();
+if (!gotLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    const win = BrowserWindow.getAllWindows()[0];
+    if (win) {
+      if (win.isMinimized()) win.restore();
+      win.focus();
+    }
+  });
+
+  app.whenReady().then(() => {
+    app.on('web-contents-created', (_e, contents) => {
+      contents.session.setPermissionRequestHandler((_wc, _permission, callback) => callback(false));
+      contents.session.setPermissionCheckHandler(() => false);
+    });
+
+    ipcMain.handle('news:get', (e) => validateSender(e) ? getNews() : null);
+    ipcMain.handle('links:get', (e) => validateSender(e) ? getLinks() : null);
+    ipcMain.handle('links:save', (e, v) => validateSender(e) ? saveLinks(v) : null);
+    ipcMain.handle('open:external', (e, url) => validateSender(e) ? openExternal(url) : false);
+    ipcMain.handle('spotify:launch', (e) => validateSender(e) ? launchSpotify() : null);
+    createWindow();
+    app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
+  });
+  app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
+}
