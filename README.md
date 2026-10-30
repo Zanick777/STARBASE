@@ -91,9 +91,9 @@ Quick links are stored as JSON in Electron's `userData` directory and written at
 
 | OS | Path |
 |----|------|
-| Windows | `%APPDATA%\starbase\quicklinks.json` |
-| Linux | `~/.config/starbase/quicklinks.json` |
-| macOS | `~/Library/Application Support/starbase/quicklinks.json` |
+| Windows | `%APPDATA%\STARBASE\quicklinks.json` |
+| Linux | `~/.config/STARBASE/quicklinks.json` |
+| macOS | `~/Library/Application Support/STARBASE/quicklinks.json` |
 
 Delete the file to go back to the default tiles. News isn't written to disk. The last good fetch is kept in memory as the offline fallback.
 
