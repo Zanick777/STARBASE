@@ -11,11 +11,10 @@ export function SpotifyLauncher() {
     <section className="panel spotify">
       <div className="panel-head"><h2><span className="idx">02</span>AUDIO</h2></div>
       <button className="launch" onClick={go}>
-        <span className="eq"><i /><i /><i /><i /></span>
         <span className="label">LAUNCH SPOTIFY</span>
         <span className="arrow">→</span>
       </button>
-      <div className="hint">{msg || 'spotify:  //  fallback open.spotify.com'}</div>
+      {msg && <div className="hint">{msg}</div>}
     </section>
   );
 }

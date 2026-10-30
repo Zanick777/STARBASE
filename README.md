@@ -63,7 +63,9 @@ T-0  🔥
 | `npm test` | Vitest unit tests (feed parsing, entity decoding, URL allow-list, link sanitizing) |
 | `npm run typecheck` | Strict TypeScript across renderer, main and preload |
 | `npm run icons` | Regenerate `build/icon.png` + `build/icon.ico` from `build/icon.svg` |
-| `npm run dist:win` | Build the Windows x64 installer + portable exe into `release/` |
+| `npm run dist` | Build the Windows x64 portable exe into `release/` (default) |
+| `npm run dist:installer` | Build the Windows x64 NSIS installer into `release/` |
+| `npm run dist:all` | Build both portable exe and installer into `release/` |
 
 > **Linux note:** if `node_modules/electron/dist` is missing after install (newer npm versions can hold back install scripts), run `node node_modules/electron/install.js`.
 
@@ -94,9 +96,9 @@ Click **More info → Run anyway**. You only need to do this once per downloaded
 
 ### Locally (Windows, macOS or Linux)
 ```bash
-npm run dist:win
-# → release/STARBASE-Setup.exe  (NSIS installer, x64)
-# → release/STARBASE.exe        (portable, x64)
+npm run dist           # → release/STARBASE.exe (portable, x64, default)
+npm run dist:installer # → release/STARBASE-Setup.exe (NSIS installer, x64)
+npm run dist:all       # → both portable and installer
 ```
 On Windows this needs nothing extra. On Linux or macOS the **portable** target builds natively (`npx electron-builder --win portable --x64`), but the **NSIS installer** needs Wine, because electron-builder runs it to generate the uninstaller. If you don't have Wine, let CI build it.
 The binary is **unsigned**, so the first time you run it Windows SmartScreen will warn you. Click *More info → Run anyway*.
