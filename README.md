@@ -1,17 +1,25 @@
-<p align="center"><img src="docs/icon.png" width="96" alt="STARBASE icon"></p>
-<h1 align="center">S T A R B A S E</h1>
+<p align="center"><img src="docs/assets/banner.svg" alt="STARBASE" width="100%"></p>
+
 <p align="center"><b>Mission control for one. Pure black, zero clutter, all signal.</b></p>
 
 <p align="center">
-  <img alt="Electron" src="https://img.shields.io/badge/Electron-45-000000?style=flat-square&logo=electron&logoColor=white">
-  <img alt="React" src="https://img.shields.io/badge/React-19-000000?style=flat-square&logo=react&logoColor=white">
-  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-000000?style=flat-square&logo=typescript&logoColor=white">
-  <img alt="Vite" src="https://img.shields.io/badge/Vite-renderer-000000?style=flat-square&logo=vite&logoColor=white">
-  <img alt="Platform" src="https://img.shields.io/badge/target-Windows%20x64%20portable-ff3d2e?style=flat-square&logo=windows&logoColor=white">
-  <img alt="API keys" src="https://img.shields.io/badge/API%20keys%20required-0-ffffff?style=flat-square">
+  <img alt="Electron" src="https://img.shields.io/badge/ELECTRON-45-000000?style=for-the-badge&logo=electron&logoColor=white&labelColor=000000">
+  <img alt="React" src="https://img.shields.io/badge/REACT-19-000000?style=for-the-badge&logo=react&logoColor=white&labelColor=000000">
+  <img alt="TypeScript" src="https://img.shields.io/badge/TYPESCRIPT-STRICT-3E6AE1?style=for-the-badge&logo=typescript&logoColor=white&labelColor=000000">
+  <img alt="Vite" src="https://img.shields.io/badge/VITE-RENDERER-000000?style=for-the-badge&logo=vite&logoColor=white&labelColor=000000">
+  <img alt="Platform" src="https://img.shields.io/badge/WINDOWS-X64%20PORTABLE-ff4b3a?style=for-the-badge&logo=windows&logoColor=white&labelColor=000000">
+  <img alt="API keys" src="https://img.shields.io/badge/API%20KEYS-0-ffffff?style=for-the-badge&labelColor=000000">
+  <img alt="License" src="https://img.shields.io/badge/LICENSE-MIT-c9ccd3?style=for-the-badge&labelColor=000000">
 </p>
 
-<p align="center"><img src="docs/starbase-news.png" alt="STARBASE main console" width="900"></p>
+<p align="center">
+  <a href="#overview">Overview</a> &nbsp;·&nbsp; <a href="#features">Features</a> &nbsp;·&nbsp; <a href="#screenshots">Screenshots</a> &nbsp;·&nbsp;
+  <a href="#tech-stack">Tech stack</a> &nbsp;·&nbsp; <a href="#getting-started-dev-setup">Getting started</a> &nbsp;·&nbsp; <a href="#install-windows-11">Install</a> &nbsp;·&nbsp; <a href="docs/TESTING.md">Testing</a>
+</p>
+
+<p align="center"><img src="docs/assets/screenshots/01-dashboard.png" alt="STARBASE main console" width="900"></p>
+
+## Overview
 
 STARBASE is a personal command center for a Linux/infrastructure engineer who happens to sit in front of a
 Windows 11 box. Open it and you get the day's AI and tech headlines, your go-to sites, and a big button that
@@ -21,7 +29,8 @@ It's a single portable `.exe`, so there's no installer and no account to make. I
 
 ---
 
-## 🛰 Flight Systems
+
+## Features
 
 | # | System | What it does |
 |---|--------|--------------|
@@ -32,19 +41,42 @@ It's a single portable `.exe`, so there's no installer and no account to make. I
 | ⏱ | **Clocks** | Local time, UTC and an ISO date. |
 | ↻ | **Refresh** | Manual refresh plus auto-refresh every 15 minutes. Feeds fail independently, and if the whole network is out you get an *OFFLINE* banner with cached headlines. The app doesn't crash. |
 
-**Design notes:** pure `#000` background, white and cool-grey type, and one accent color, ignition red `#ff3d2e`.
-It uses Space Grotesk for display text and JetBrains Mono for data. Both fonts are bundled locally through Fontsource, so nothing loads from a CDN.
-Borders are 1px. Motion is limited to a scan bar while syncing, staggered rows and an equalizer that pulses.
+**Design notes:** pure `#000` canvas with restrained launch-blue `#3E6AE1` and ignition-red `#FF4B3A` glows. The wordmark and section titles use
+**Michroma**, a wide geometric display face, letter-spaced in uppercase. The wordmark has a metallic silver-to-gold gradient. Body text uses **Inter**, and data uses **JetBrains Mono**.
+All three fonts are bundled locally through Fontsource, so nothing loads from a CDN. Their SIL OFL licenses are in [`docs/licenses/`](docs/licenses).
+Panels are rounded and glassy, the primary buttons are solid blue, and focus rings are visible. Motion is limited to a scan bar while syncing, staggered rows and a pulsing equalizer, and it switches off under `prefers-reduced-motion`.
 
 **Security posture:** `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`, and a strict CSP.
 The preload exposes five IPC calls and nothing else. Only `http:`, `https:` and `spotify:` URLs are allowed out to `shell.openExternal`.
 In-app navigation and `window.open` are blocked and sent to the default browser. All network fetches run in the main process, so CORS doesn't come into it.
 
-<p align="center"><img src="docs/starbase-ai-edit.png" alt="AI filter + quick-link edit mode" width="900"><br><sub>AI filter engaged, quick links in edit mode.</sub></p>
 
 ---
 
-## 🚀 Launch Sequence (dev setup)
+## Screenshots
+
+| Main console | AI filter + quick-link editor |
+|---|---|
+| <img src="docs/assets/screenshots/01-dashboard.png" alt="Main console" width="440"> | <img src="docs/assets/screenshots/02-ai-filter-edit-links.png" alt="AI filter engaged, quick links in edit mode" width="440"> |
+| **Offline banner with cached headlines** | **Compact window (1024 px)** |
+| <img src="docs/assets/screenshots/03-offline.png" alt="Offline state" width="440"> | <img src="docs/assets/screenshots/04-compact-1024.png" alt="Compact layout" width="440"> |
+
+<sub>Rendered with sample data.</sub>
+
+## Tech stack
+
+| Layer | Tools |
+|---|---|
+| Shell | Electron 45 (context-isolated, sandboxed renderer) |
+| UI | React 19, TypeScript (strict), Vite, plain CSS design tokens |
+| Feeds | `fast-xml-parser` in the main process |
+| Type | Michroma · Inter · JetBrains Mono (Fontsource, bundled offline) |
+| Tests | Vitest |
+| Packaging | electron-builder (NSIS + portable), GitHub Actions |
+
+---
+
+## Getting started (dev setup)
 
 Requires Node.js 20+ (built and tested on 24) and npm.
 
@@ -54,6 +86,8 @@ T-2  npm install
 T-1  npm run dev        # Vite dev server + Electron with live renderer reload
 T-0  🔥
 ```
+
+### Scripts
 
 | Command | Purpose |
 |---------|---------|
@@ -67,7 +101,7 @@ T-0  🔥
 
 > **Linux note:** if `node_modules/electron/dist` is missing after install (newer npm versions can hold back install scripts), run `node node_modules/electron/install.js`.
 
-## 🧑‍🚀 INSTALL — Boarding Procedure (Windows 11)
+## Install (Windows 11)
 
 **1. Get the binaries.** Open [Releases](https://github.com/Zanick777/STARBASE/releases/latest) and download one of these:
 
@@ -90,7 +124,7 @@ Click **More info → Run anyway**. You only need to do this once per downloaded
 
 **No accounts, no cloud.** STARBASE has no login, telemetry, analytics, auto-updater or backend. Its only network traffic is HTTPS GETs to the public news feeds listed above, plus whatever links you click, which open in your browser.
 
-## 🏗 Stage Separation (building the Windows .exe)
+## Building the Windows .exe
 
 ### Locally (Windows, macOS or Linux)
 ```bash
@@ -109,7 +143,7 @@ When you push a tag, it also attaches both exes to a GitHub Release:
 git tag v1.0.0 && git push origin v1.0.0
 ```
 
-## 💾 Black Box (where settings live)
+## Where settings live
 
 Quick links are stored as JSON in Electron's `userData` directory and written atomically:
 
@@ -121,18 +155,18 @@ Quick links are stored as JSON in Electron's `userData` directory and written at
 
 Delete the file to go back to the default tiles. News isn't written to disk. The last good fetch is kept in memory as the offline fallback.
 
-## 🗺 Project Layout
+## Project structure
 ```
 src/main/       Electron main: window, IPC, feed fetching, link storage
 src/preload/    contextBridge → window.starbase (5 methods)
 src/shared/     Pure, tested logic: feed parsing, URL rules, link sanitizing
 src/renderer/   React UI (NewsFeed, QuickLinks, SpotifyLauncher, Telemetry = source status)
-docs/           Screenshots + TESTING.md (what's verified where)
+docs/           Screenshots, banner, font licenses + TESTING.md (what's verified where)
 build/          App icon (svg / png / ico)
 tests/          Vitest suite
 ```
 
-## 📡 Mission Log
+## Roadmap
 
 - [x] **v1.0 — First light.** News feed with publish dates and source links, editable quick links, Spotify launcher, source status, Windows installer + portable build, CI.
 - [ ] Configurable feed list (add your own RSS from inside the app)

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320" role="img" aria-label="STARBASE">
+  <defs>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff"/><stop offset=".3" stop-color="#c9ccd3"/><stop offset=".52" stop-color="#8d929c"/><stop offset=".72" stop-color="#e8e2d2"/><stop offset="1" stop-color="#d8c08a"/>
+    </linearGradient>
+    <radialGradient id="blue" cx=".85" cy="0" r=".7"><stop offset="0" stop-color="#3e6ae1" stop-opacity=".35"/><stop offset="1" stop-color="#3e6ae1" stop-opacity="0"/></radialGradient>
+    <radialGradient id="red" cx=".1" cy="1.1" r=".6"><stop offset="0" stop-color="#ff4b3a" stop-opacity=".25"/><stop offset="1" stop-color="#ff4b3a" stop-opacity="0"/></radialGradient>
+    <linearGradient id="horizon" x1="0" x2="1"><stop offset="0" stop-color="#3e6ae1" stop-opacity="0"/><stop offset=".4" stop-color="#3e6ae1"/><stop offset=".65" stop-color="#ff4b3a"/><stop offset="1" stop-color="#ff4b3a" stop-opacity="0"/></linearGradient>
+    <filter id="glow" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="1280" height="320" fill="#000"/>
+  <rect width="1280" height="320" fill="url(#blue)"/><rect width="1280" height="320" fill="url(#red)"/>
+  <g filter="url(#glow)" transform="translate(640 172) skewX(-10)" fill="url(#metal)"
+     font-family="Michroma, Eurostile, 'Arial Black', Verdana, sans-serif" font-size="74" text-anchor="middle">
+    <text letter-spacing="34" textLength="900" lengthAdjust="spacingAndGlyphs">STARBASE</text>
+  </g>
+  <rect x="190" y="226" width="900" height="1" fill="url(#horizon)"/>
+  <text x="640" y="266" fill="#a3a8b2" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" letter-spacing="7" text-anchor="middle">MISSION CONTROL FOR ONE</text>
+  <g fill="#fff"><circle cx="622" cy="296" r="3"/><circle cx="640" cy="296" r="3" opacity=".35"/><circle cx="658" cy="296" r="3" opacity=".35"/></g>
+</svg>
