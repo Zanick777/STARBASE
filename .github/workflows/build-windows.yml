@@ -19,7 +19,15 @@ jobs:
       - run: npm run dist:win
         env: { CSC_IDENTITY_AUTO_DISCOVERY: 'false' }
       - uses: actions/upload-artifact@v4
-        with: { name: STARBASE-windows-x64, path: release/STARBASE.exe }
+        with:
+          name: STARBASE-windows-x64
+          if-no-files-found: error
+          path: |
+            release/STARBASE-Setup.exe
+            release/STARBASE.exe
       - if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
-        with: { files: release/STARBASE.exe }
+        with:
+          files: |
+            release/STARBASE-Setup.exe
+            release/STARBASE.exe

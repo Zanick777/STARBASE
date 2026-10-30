@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FeedResult } from '../../shared/types';
-import { relativeTime, isAiRelated } from '../../shared/util';
+import { relativeTime, isAiRelated, formatDate } from '../../shared/util';
 
 const REFRESH_MS = 15 * 60 * 1000;
 
@@ -45,12 +45,12 @@ export function NewsFeed() {
         {!data && loading && Array.from({ length: 10 }).map((_, i) => <li key={i} className="skeleton"><span /></li>)}
         {items.map((it, i) => (
           <li key={it.id} style={{ animationDelay: `${Math.min(i, 30) * 18}ms` }}>
-            <button className="item" onClick={() => window.starbase.openExternal(it.url)} title={it.url}>
+            <div className="item">
               <span className="n">{String(i + 1).padStart(2, '0')}</span>
-              <span className="t">{it.title}</span>
-              <span className="src">{it.source}</span>
-              <span className="time">{relativeTime(it.published)}</span>
-            </button>
+              <a className="t" href={it.url} title={it.url} onClick={(e) => { e.preventDefault(); void window.starbase.openExternal(it.url); }}>{it.title}</a>
+              <a className="src" href={it.sourceUrl} title={`Open ${it.source}: ${it.sourceUrl}`} onClick={(e) => { e.preventDefault(); void window.starbase.openExternal(it.sourceUrl); }}>{it.source} ↗</a>
+              <time className="time" dateTime={new Date(it.published).toISOString()}>{formatDate(it.published)}<em>{relativeTime(it.published)}</em></time>
+            </div>
           </li>
         ))}
       </ol>

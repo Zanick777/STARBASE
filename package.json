@@ -2,7 +2,7 @@
   "name": "starbase",
   "productName": "STARBASE",
   "version": "1.0.0",
-  "description": "STARBASE — personal mission-control command center",
+  "description": "STARBASE \u2014 personal mission-control command center",
   "author": "Zack McCain",
   "license": "MIT",
   "main": "dist-electron/main/index.js",
@@ -15,7 +15,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.electron.json --noEmit",
     "test": "vitest run",
     "icons": "node scripts/make-icons.mjs",
-    "dist:win": "npm run build && electron-builder --win portable --x64"
+    "dist:win": "npm run build && electron-builder --win nsis portable --x64 --publish never"
   },
   "build": {
     "appId": "com.zack.starbase",
@@ -32,6 +32,12 @@
     "win": {
       "target": [
         {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
           "target": "portable",
           "arch": [
             "x64"
@@ -46,6 +52,18 @@
     "linux": {
       "target": "dir",
       "icon": "build/icon.png"
+    },
+    "publish": null,
+    "nsis": {
+      "artifactName": "STARBASE-Setup.exe",
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "STARBASE",
+      "uninstallDisplayName": "STARBASE",
+      "deleteAppDataOnUninstall": false
     }
   },
   "devDependencies": {

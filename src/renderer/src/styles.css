@@ -96,3 +96,9 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .telemetry .ct { color: var(--fg); text-align: right; } .telemetry .ms { color: var(--dim); text-align: right; }
 .telemetry .next { padding: 4px 24px 16px; color: var(--dim); font-size: 9px; letter-spacing: .2em; }
 .tile.editing { padding-top: 36px; }
+.item { grid-template-columns: 36px minmax(0, 1fr) 150px 190px; cursor: default; }
+.item a { text-decoration: none; cursor: pointer; }
+.item .t:hover { text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 4px; }
+.item .src:hover { color: var(--accent); }
+.item .time { display: flex; justify-content: flex-end; gap: 10px; color: var(--muted); font-size: 10px; letter-spacing: .04em; white-space: nowrap; }
+.item .time em { font-style: normal; color: var(--dim); min-width: 26px; text-align: right; }

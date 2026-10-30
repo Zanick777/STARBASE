@@ -24,7 +24,7 @@ async function fetchHN(src: FeedSource): Promise<NewsItem[]> {
     try { return JSON.parse(await fetchText(`https://hacker-news.firebaseio.com/v0/item/${id}.json`, 8000)); } catch { return null; }
   }));
   return items.filter((i) => i && i.title).map((i) => ({
-    id: `hn-${i.id}`, title: i.title, source: 'Hacker News', published: i.time * 1000,
+    id: `hn-${i.id}`, title: i.title, source: 'Hacker News', sourceUrl: `https://news.ycombinator.com/item?id=${i.id}`, published: i.time * 1000,
     url: i.url || `https://news.ycombinator.com/item?id=${i.id}`,
   }));
 }
@@ -36,7 +36,7 @@ async function getNews(): Promise<FeedResult> {
   const results = await Promise.all(FEEDS.map(async (f) => {
     const t0 = Date.now();
     try {
-      const items = f.kind === 'hn' ? await fetchHN(f) : parseFeed(await fetchText(f.url), f.name).sort((a, b) => b.published - a.published).slice(0, 25);
+      const items = f.kind === 'hn' ? await fetchHN(f) : parseFeed(await fetchText(f.url), f.name, f.home).sort((a, b) => b.published - a.published).slice(0, 25);
       sources.push({ name: f.name, ok: true, count: items.length, ms: Date.now() - t0 }); return items;
     } catch (e) {
       const error = (e as Error).message || String(e);

@@ -12,7 +12,7 @@ export function Telemetry() {
   const max = Math.max(1, ...(d?.sources.map((s) => s.count) ?? [1]));
   return (
     <section className="panel telemetry">
-      <div className="panel-head"><h2><span className="idx">04</span>UPLINK TELEMETRY</h2>
+      <div className="panel-head"><h2><span className="idx">04</span>SOURCE STATUS</h2>
         <div className="meta">{d ? `${up}/${d.sources.length} ONLINE` : 'ACQUIRING…'}</div></div>
       <ul>
         {d?.sources.map((s) => (

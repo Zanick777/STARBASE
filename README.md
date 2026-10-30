@@ -25,10 +25,10 @@ It's a single portable `.exe`, so there's no installer and no account to make. I
 
 | # | System | What it does |
 |---|--------|--------------|
-| 01 | **Intel Feed** | Merges AI and tech news from Hacker News (official Firebase API), TechCrunch AI, The Verge AI, Ars Technica, MIT Technology Review and the Hugging Face blog. Drops duplicates and sorts newest first. Each row shows title, source and relative time. An **ALL / AI** toggle filters the list to AI topics. Click a headline to open it in your default browser. |
+| 01 | **Intel Feed** | Merges AI and tech news from Hacker News (official Firebase API), TechCrunch AI, The Verge AI, Ars Technica, MIT Technology Review and the Hugging Face blog. Drops duplicates and sorts newest first. Each row shows the title (click it to open the article), the source name (click it to open that publication's site, or the HN discussion for Hacker News items), and the publish date in local time, like `Oct 29, 2026 · 7:42 PM`, with a relative age next to it. An **ALL / AI** toggle filters the list to AI topics.  Every link opens in your default browser. |
 | 02 | **Audio** | A large **LAUNCH SPOTIFY** button. It hands off to the Spotify desktop app through the `spotify:` URI. If that fails, it opens https://open.spotify.com. |
 | 03 | **Quick Links** | A tile grid for the sites you use most. Defaults are GitHub, X, YouTube, Gmail, Grok and ChatGPT. Under **EDIT** you can add, rename, re-point, reorder (drag or ← →) and delete tiles. Everything persists locally. |
-| 04 | **Uplink Telemetry** | Shows live status for each feed: online/error, item count and latency, so you can see which source is down. |
+| 04 | **Source Status** | Shows live status for each feed: online/error, item count and latency, so you can see which source is down. |
 | ⏱ | **Clocks** | Local time, UTC and an ISO date. |
 | ↻ | **Refresh** | Manual refresh plus auto-refresh every 15 minutes. Feeds fail independently, and if the whole network is out you get an *OFFLINE* banner with cached headlines. The app doesn't crash. |
 
@@ -63,24 +63,48 @@ T-0  🔥
 | `npm test` | Vitest unit tests (feed parsing, entity decoding, URL allow-list, link sanitizing) |
 | `npm run typecheck` | Strict TypeScript across renderer, main and preload |
 | `npm run icons` | Regenerate `build/icon.png` + `build/icon.ico` from `build/icon.svg` |
-| `npm run dist:win` | Build the Windows x64 portable `release/STARBASE.exe` |
+| `npm run dist:win` | Build the Windows x64 installer + portable exe into `release/` |
 
 > **Linux note:** if `node_modules/electron/dist` is missing after install (newer npm versions can hold back install scripts), run `node node_modules/electron/install.js`.
+
+## 🧑‍🚀 INSTALL — Boarding Procedure (Windows 11)
+
+**1. Get the binaries.** Open [Releases](https://github.com/Zanick777/STARBASE/releases/latest) and download one of these:
+
+| File | Pick it if… |
+|------|-------------|
+| `STARBASE-Setup.exe` | You want a normal installed app: Start Menu + desktop shortcut, a listing in *Installed apps*, and a clean uninstall. The installer asks where to install (default is per-user, no admin needed). |
+| `STARBASE.exe` | You want **portable**: no install, nothing in Start Menu. Put it anywhere (Desktop, a USB stick) and double-click. The first launch takes a few seconds while it unpacks to a temp folder. |
+
+**2. Clear SmartScreen.** The binaries aren't code-signed, so Windows will show *"Windows protected your PC"*.
+Click **More info → Run anyway**. You only need to do this once per downloaded file. If Edge blocks the download itself, open the download menu (**…**), choose **Keep**, then **Show more → Keep anyway**.
+
+**3. Liftoff.** Launch STARBASE. Headlines load within seconds when you're online.
+
+**Where your settings live:** `%APPDATA%\STARBASE\quicklinks.json`. That folder is shared by the installer and portable builds, so switching between them keeps your tiles.
+
+**Uninstall:**
+- *Installer build:* go to **Settings → Apps → Installed apps → STARBASE → ⋯ → Uninstall**, or use *Uninstall STARBASE* in the Start Menu.
+- *Portable build:* delete `STARBASE.exe`.
+- Either way, your settings are kept on purpose. For a full wipe, also delete `%APPDATA%\STARBASE`.
+
+**No accounts, no cloud.** STARBASE has no login, telemetry, analytics, auto-updater or backend. Its only network traffic is HTTPS GETs to the public news feeds listed above, plus whatever links you click, which open in your browser.
 
 ## 🏗 Stage Separation (building the Windows .exe)
 
 ### Locally (Windows, macOS or Linux)
 ```bash
 npm run dist:win
-# → release/STARBASE.exe  (portable, x64, no installer)
+# → release/STARBASE-Setup.exe  (NSIS installer, x64)
+# → release/STARBASE.exe        (portable, x64)
 ```
-This also works on Linux, and Wine isn't needed. electron-builder runs NSIS and edits the exe resources natively.
+On Windows this needs nothing extra. On Linux or macOS the **portable** target builds natively (`npx electron-builder --win portable --x64`), but the **NSIS installer** needs Wine, because electron-builder runs it to generate the uninstaller. If you don't have Wine, let CI build it.
 The binary is **unsigned**, so the first time you run it Windows SmartScreen will warn you. Click *More info → Run anyway*.
 
 ### Via GitHub Actions
 `.github/workflows/build-windows.yml` runs on `windows-latest` for every push to `main`, every `v*` tag, and manual dispatch.
-It typechecks, tests, builds and uploads `STARBASE.exe` as the **STARBASE-windows-x64** artifact.
-When you push a tag, it also attaches the exe to a GitHub Release:
+It typechecks, tests, builds and uploads `STARBASE-Setup.exe` and `STARBASE.exe` as the **STARBASE-windows-x64** artifact.
+When you push a tag, it also attaches both exes to a GitHub Release:
 ```bash
 git tag v1.0.0 && git push origin v1.0.0
 ```
@@ -102,14 +126,15 @@ Delete the file to go back to the default tiles. News isn't written to disk. The
 src/main/       Electron main: window, IPC, feed fetching, link storage
 src/preload/    contextBridge → window.starbase (5 methods)
 src/shared/     Pure, tested logic: feed parsing, URL rules, link sanitizing
-src/renderer/   React UI (NewsFeed, QuickLinks, SpotifyLauncher, Telemetry)
+src/renderer/   React UI (NewsFeed, QuickLinks, SpotifyLauncher, Telemetry = source status)
+docs/           Screenshots + TESTING.md (what's verified where)
 build/          App icon (svg / png / ico)
 tests/          Vitest suite
 ```
 
 ## 📡 Mission Log
 
-- [x] **v1.0 — First light.** News feed, quick links, Spotify launcher, telemetry, portable Windows build, CI.
+- [x] **v1.0 — First light.** News feed with publish dates and source links, editable quick links, Spotify launcher, source status, Windows installer + portable build, CI.
 - [ ] Configurable feed list (add your own RSS from inside the app)
 - [ ] Global hotkey to summon STARBASE
 - [ ] Favicons on quick-link tiles (cached locally)
@@ -117,6 +142,7 @@ tests/          Vitest suite
 - [ ] Homelab panel: ping and health-check your own servers
 
 ## Known limitations
+- Windows verification status is tracked in [docs/TESTING.md](docs/TESTING.md).
 - The exe is unsigned, so SmartScreen will warn on first run.
 - On Windows, `spotify:` reports success whenever *any* handler is registered. The web fallback only kicks in when the OS rejects the URI.
 - Feed URLs are public and could change. If one breaks, Telemetry flags it and the other sources keep working.

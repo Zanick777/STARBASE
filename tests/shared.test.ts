@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { parseFeed, mergeItems } from '../src/shared/feeds';
-import { isAllowedExternal, normalizeUrl, relativeTime, isAiRelated } from '../src/shared/util';
+import { formatDate, isAllowedExternal, normalizeUrl, relativeTime, isAiRelated } from '../src/shared/util';
 import { sanitizeLinks, DEFAULT_LINKS } from '../src/shared/links';
 
 const RSS = `<?xml version="1.0"?><rss><channel><item><title>New LLM released</title><link>https://a.com/1</link><pubDate>Thu, 29 Oct 2026 10:00:00 GMT</pubDate></item><item><title>Second</title><link>https://a.com/2</link></item></channel></rss>`;
@@ -10,7 +10,8 @@ describe('feeds', () => {
   it('parses RSS', () => {
     const items = parseFeed(RSS, 'A');
     expect(items).toHaveLength(2);
-    expect(items[0]).toMatchObject({ title: 'New LLM released', url: 'https://a.com/1', source: 'A' });
+    expect(items[0]).toMatchObject({ title: 'New LLM released', url: 'https://a.com/1', source: 'A', sourceUrl: 'https://a.com' });
+    expect(parseFeed(RSS, 'A', 'https://home.a')[0].sourceUrl).toBe('https://home.a');
     expect(items[0].published).toBe(Date.parse('2026-10-29T10:00:00Z'));
   });
   it('parses Atom', () => {
@@ -18,8 +19,8 @@ describe('feeds', () => {
   });
   it('returns [] for garbage', () => expect(parseFeed('<html>nope</html>', 'x')).toEqual([]));
   it('merges, dedupes and sorts newest first', () => {
-    const m = mergeItems([[{ id: '1', title: 'a', url: 'https://x/1?utm=1', source: 's', published: 1 }],
-      [{ id: '2', title: 'b', url: 'https://x/1', source: 's', published: 5 }, { id: '3', title: 'c', url: 'https://x/3', source: 's', published: 9 }]]);
+    const m = mergeItems([[{ id: '1', title: 'a', url: 'https://x/1?utm=1', source: 's', sourceUrl: '', published: 1 }],
+      [{ id: '2', title: 'b', url: 'https://x/1', source: 's', sourceUrl: '', published: 5 }, { id: '3', title: 'c', url: 'https://x/3', source: 's', sourceUrl: '', published: 9 }]]);
     expect(m.map((i) => i.id)).toEqual(['3', '1']);
   });
 });
@@ -58,5 +59,11 @@ import { decodeEntities } from '../src/shared/feeds';
 describe('entities', () => {
   it('decodes numeric, named and double-escaped entities', () => {
     expect(decodeEntities('You don&#8217;t &amp; it&amp;#8217;s <b>bold</b>')).toBe('You don’t & it’s bold');
+  });
+});
+
+describe('formatDate', () => {
+  it('formats as "Mon D, YYYY · h:mm AM/PM"', () => {
+    expect(formatDate(new Date(2026, 9, 29, 19, 42).getTime())).toBe('Oct 29, 2026 · 7:42 PM');
   });
 });

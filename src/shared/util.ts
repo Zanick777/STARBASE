@@ -14,5 +14,11 @@ export function relativeTime(ts: number, now = Date.now()): string {
   const h = Math.round(m / 60); if (h < 24) return `${h}h`;
   return `${Math.round(h / 24)}d`;
 }
+export function formatDate(ts: number, locale?: string): string {
+  const d = new Date(ts);
+  const date = d.toLocaleDateString(locale ?? 'en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const time = d.toLocaleTimeString(locale ?? 'en-US', { hour: 'numeric', minute: '2-digit' });
+  return `${date} · ${time}`;
+}
 const AI_RE = /\b(ai|a\.i\.|llm|gpt|openai|anthropic|claude|gemini|grok|xai|llama|mistral|neural|machine learning|deep learning|model|agent|nvidia|gpu|transformer|diffusion|chatbot|robot)/i;
 export const isAiRelated = (t: string) => AI_RE.test(t);

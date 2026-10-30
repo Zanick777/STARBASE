@@ -1,14 +1,14 @@
 import { XMLParser } from 'fast-xml-parser';
 import type { NewsItem } from './types';
 
-export interface FeedSource { name: string; url: string; kind: 'rss' | 'hn'; aiOnly?: boolean; }
+export interface FeedSource { name: string; url: string; kind: 'rss' | 'hn'; home: string; }
 export const FEEDS: FeedSource[] = [
-  { name: 'Hacker News', url: 'https://hacker-news.firebaseio.com/v0/topstories.json', kind: 'hn' },
-  { name: 'TechCrunch AI', url: 'https://techcrunch.com/category/artificial-intelligence/feed/', kind: 'rss' },
-  { name: 'The Verge', url: 'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml', kind: 'rss' },
-  { name: 'Ars Technica', url: 'https://feeds.arstechnica.com/arstechnica/technology-lab', kind: 'rss' },
-  { name: 'MIT Tech Review', url: 'https://www.technologyreview.com/topic/artificial-intelligence/feed', kind: 'rss' },
-  { name: 'Hugging Face', url: 'https://huggingface.co/blog/feed.xml', kind: 'rss' },
+  { name: 'Hacker News', url: 'https://hacker-news.firebaseio.com/v0/topstories.json', kind: 'hn', home: 'https://news.ycombinator.com' },
+  { name: 'TechCrunch AI', url: 'https://techcrunch.com/category/artificial-intelligence/feed/', kind: 'rss', home: 'https://techcrunch.com/category/artificial-intelligence/' },
+  { name: 'The Verge', url: 'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml', kind: 'rss', home: 'https://www.theverge.com/ai-artificial-intelligence' },
+  { name: 'Ars Technica', url: 'https://feeds.arstechnica.com/arstechnica/technology-lab', kind: 'rss', home: 'https://arstechnica.com' },
+  { name: 'MIT Tech Review', url: 'https://www.technologyreview.com/topic/artificial-intelligence/feed', kind: 'rss', home: 'https://www.technologyreview.com/topic/artificial-intelligence/' },
+  { name: 'Hugging Face', url: 'https://huggingface.co/blog/feed.xml', kind: 'rss', home: 'https://huggingface.co/blog' },
 ];
 
 const text = (v: unknown): string => {
@@ -29,9 +29,10 @@ export function decodeEntities(s: string): string {
   }
   return s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
 }
+const origin = (u: string) => { try { return new URL(u).origin; } catch { return ''; } };
 const arr = <T>(v: T | T[] | undefined): T[] => (v == null ? [] : Array.isArray(v) ? v : [v]);
 
-export function parseFeed(xml: string, source: string): NewsItem[] {
+export function parseFeed(xml: string, source: string, sourceUrl = ''): NewsItem[] {
   const p = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_' });
   const doc = p.parse(xml);
   const out: NewsItem[] = [];
@@ -40,7 +41,7 @@ export function parseFeed(xml: string, source: string): NewsItem[] {
     const url = text(it.link) || text(it.guid);
     const title = decodeEntities(text(it.title));
     const d = Date.parse(text(it.pubDate) || text(it['dc:date']));
-    if (title && url) out.push({ id: url, title, url, source, published: isNaN(d) ? Date.now() : d });
+    if (title && url) out.push({ id: url, title, url, source, sourceUrl: sourceUrl || origin(url), published: isNaN(d) ? Date.now() : d });
   }
   for (const e of arr(doc?.feed?.entry)) {
     const links = arr<any>(e.link);
@@ -48,7 +49,7 @@ export function parseFeed(xml: string, source: string): NewsItem[] {
     const url = alt ? text(alt['@_href'] ?? alt) : '';
     const title = decodeEntities(text(e.title));
     const d = Date.parse(text(e.published) || text(e.updated));
-    if (title && url) out.push({ id: url, title, url, source, published: isNaN(d) ? Date.now() : d });
+    if (title && url) out.push({ id: url, title, url, source, sourceUrl: sourceUrl || origin(url), published: isNaN(d) ? Date.now() : d });
   }
   return out;
 }
