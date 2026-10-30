@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain, shell, net } from 'electron';
 import * as path from 'path';
+import { pathToFileURL } from 'url';
 import * as fs from 'fs/promises';
 import { FEEDS, parseFeed, mergeItems, FeedSource } from '../shared/feeds';
 import { DEFAULT_LINKS, sanitizeLinks } from '../shared/links';
@@ -71,20 +72,32 @@ async function launchSpotify(): Promise<'app' | 'web'> {
   catch { await shell.openExternal('https://open.spotify.com'); return 'web'; }
 }
 
+function normalizeUrl(url: string): string {
+  try { const u = new URL(url); u.hash = ''; u.search = ''; return u.href; } catch { return url; }
+}
+
+function isAllowedAppUrl(url: string, devUrl: string | undefined, appFileUrl: string): boolean {
+  if (devUrl && url.startsWith(devUrl)) return true;
+  return normalizeUrl(url) === appFileUrl;
+}
+
+let mainWindow: BrowserWindow | null = null;
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1440, height: 900, minWidth: 1000, minHeight: 640, backgroundColor: '#000000',
     title: 'STARBASE', icon: path.join(__dirname, '../../dist/icon.png'), autoHideMenuBar: true, show: false,
     webPreferences: { preload: path.join(__dirname, '../preload/index.js'), contextIsolation: true, nodeIntegration: false, sandbox: true },
   });
+  mainWindow = win;
+  win.on('closed', () => { mainWindow = null; });
   win.once('ready-to-show', () => win.show());
   win.webContents.setWindowOpenHandler(({ url }) => { void openExternal(url); return { action: 'deny' }; });
   const dev = process.env.VITE_DEV_SERVER_URL;
   const indexPath = path.join(__dirname, '../../dist/index.html');
-  const allowedOrigin = dev ?? `file://${indexPath}`;
+  const appFileUrl = pathToFileURL(indexPath).href;
   win.webContents.on('will-navigate', (e, url) => {
-    const isOwnEntry = url === allowedOrigin || (!dev && url.startsWith('file://') && url.includes('/dist/index.html'));
-    if (!isOwnEntry) { e.preventDefault(); void openExternal(url); }
+    if (!isAllowedAppUrl(url, dev, appFileUrl)) { e.preventDefault(); void openExternal(url); }
   });
   if (dev) void win.loadURL(dev); else void win.loadFile(indexPath);
   if (process.env.STARBASE_SCREENSHOT && !app.isPackaged) {
@@ -94,11 +107,13 @@ function createWindow() {
       await fs.writeFile(process.env.STARBASE_SCREENSHOT!, img.toPNG()); app.quit();
     }, Number(process.env.STARBASE_SCREENSHOT_DELAY || 15000)));
   }
+  return { dev, appFileUrl };
 }
 
-function validateSender(e: Electron.IpcMainInvokeEvent): boolean {
-  const win = BrowserWindow.fromWebContents(e.sender);
-  return win !== null && !e.sender.isDestroyed();
+function validateSender(e: Electron.IpcMainInvokeEvent, config: { dev?: string; appFileUrl: string }): boolean {
+  if (!mainWindow || e.sender !== mainWindow.webContents || e.sender.isDestroyed() || !e.senderFrame) return false;
+  const frameUrl = e.senderFrame.url;
+  return isAllowedAppUrl(frameUrl, config.dev, config.appFileUrl);
 }
 
 const gotLock = app.requestSingleInstanceLock();
@@ -119,12 +134,12 @@ if (!gotLock) {
       contents.session.setPermissionCheckHandler(() => false);
     });
 
-    ipcMain.handle('news:get', (e) => validateSender(e) ? getNews() : null);
-    ipcMain.handle('links:get', (e) => validateSender(e) ? getLinks() : null);
-    ipcMain.handle('links:save', (e, v) => validateSender(e) ? saveLinks(v) : null);
-    ipcMain.handle('open:external', (e, url) => validateSender(e) ? openExternal(url) : false);
-    ipcMain.handle('spotify:launch', (e) => validateSender(e) ? launchSpotify() : null);
-    createWindow();
+    const config = createWindow();
+    ipcMain.handle('news:get', (e) => validateSender(e, config) ? getNews() : null);
+    ipcMain.handle('links:get', (e) => validateSender(e, config) ? getLinks() : null);
+    ipcMain.handle('links:save', (e, v) => validateSender(e, config) ? saveLinks(v) : null);
+    ipcMain.handle('open:external', (e, url) => validateSender(e, config) ? openExternal(url) : false);
+    ipcMain.handle('spotify:launch', (e) => validateSender(e, config) ? launchSpotify() : null);
     app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
   });
   app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });

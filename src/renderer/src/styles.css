@@ -51,8 +51,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .item:hover .t { color: var(--fg); }
 .item .src { color: var(--muted); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .item .time { color: var(--dim); font-size: 11px; text-align: right; }
-.skeleton span { display: block; height: 14px; margin: 16px 24px; background: linear-gradient(90deg, #111, #222, #111); background-size: 200%; animation: shimmer 1.2s infinite; }
-@keyframes shimmer { to { background-position: -200% 0; } }
+.skeleton span { display: block; height: 14px; margin: 16px 24px; background: var(--line); }
 
 .spotify .launch { margin: 20px 24px 8px; display: flex; align-items: center; gap: 16px; padding: 22px 22px; border: 1px solid var(--fg);
   font-family: var(--display); font-weight: 700; font-size: 16px; letter-spacing: .3em; transition: all .2s; position: relative; overflow: hidden; }
@@ -80,12 +79,6 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .links .tiles { border-bottom: 0; }
 .telemetry-badge { display: flex; align-items: center; gap: 8px; color: var(--dim); font-size: 10px; letter-spacing: .15em; }
 .telemetry-badge.error { color: var(--accent); }
-.telemetry ul { list-style: none; padding: 10px 24px; }
-.telemetry li { display: grid; grid-template-columns: 10px 120px 1fr 30px 56px; gap: 12px; align-items: center; padding: 8px 0; font-size: 10px; letter-spacing: .1em; color: var(--muted); border-bottom: 1px solid var(--line); }
-.telemetry .nm { text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.telemetry .bar { height: 2px; background: var(--line); } .telemetry .bar i { display: block; height: 100%; background: var(--fg); transition: width .6s; }
-.telemetry .ct { color: var(--fg); text-align: right; } .telemetry .ms { color: var(--dim); text-align: right; }
-.telemetry .next { padding: 4px 24px 16px; color: var(--dim); font-size: 9px; letter-spacing: .2em; }
 .tile.editing { padding-top: 36px; }
 .item { grid-template-columns: 36px minmax(0, 1fr) 150px 190px; cursor: default; }
 .item a { text-decoration: none; cursor: pointer; }
