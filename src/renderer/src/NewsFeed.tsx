@@ -44,7 +44,7 @@ export function NewsFeed() {
       <ol className="items">
         {!data && loading && Array.from({ length: 10 }).map((_, i) => <li key={i} className="skeleton"><span /></li>)}
         {items.map((it, i) => (
-          <li key={it.id} style={{ animationDelay: `${Math.min(i, 30) * 18}ms` }}>
+          <li key={it.id}>
             <div className="item">
               <span className="n">{String(i + 1).padStart(2, '0')}</span>
               <a className="t" href={it.url} title={it.url} onClick={(e) => { e.preventDefault(); void window.starbase.openExternal(it.url); }}>{it.title}</a>
