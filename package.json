@@ -68,7 +68,6 @@
       "deleteAppDataOnUninstall": false
     },
     "electronFuses": {
-      "version": "1",
       "runAsNode": false,
       "enableNodeOptionsEnvironmentVariable": false,
       "enableNodeCliInspectArguments": false,
